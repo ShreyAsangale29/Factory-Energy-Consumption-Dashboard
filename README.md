@@ -26,7 +26,7 @@ The **Factory Energy Consumption Dashboard** is an enterprise-grade full-stack w
 | **Week 12**| **Jenkins-Docker Continuous Deploy** | [Week 12 Jenkins-Docker CD Document](docs/week-12-jenkins-docker-continuous-deployment.md) | Versioned Docker image, registry publish log, automated container deploy & rollback |
 | **Week 13**| **Configuration Management (Ansible)** | [Week 13 Ansible Document](docs/week-13-configuration-management-ansible.md) | Ansible inventory (`hosts.ini`), YAML playbook, systemd service, firewall & execution log |
 | **Week 14**| **Automated Provisioning & Reliability**| [Week 14 Reliability Document](docs/week-14-automated-provisioning-reliability-validation.md) | Clean node provisioning, idempotency proof (`changed=0`), health check & rollback trace |
-| **Week 15**| **Production Release & Closure** | [Week 15 Release Document](docs/week-15-production-release-maintenance-handover.md) | Final release tag `v2.0.0-final`, operations runbook, maintenance manual, final sign-off |
+| **Week 15**| **Final Release, Documentation & Viva**| [Week 15 Viva & Final Report](docs/week-15-final-release-documentation-and-viva-guide.md) | End-to-end workflow trace, technical architecture, troubleshooting, roadmap & Viva Q&A |
 
 ---
 
