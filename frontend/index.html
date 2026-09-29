@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factory Energy Consumption Dashboard | Real-Time Monitoring</title>
+    <meta name="description" content="Industrial IoT real-time factory energy monitoring, anomaly alerting, and machine telemetry status drill-down dashboard.">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Top System Navigation Header -->
+    <header class="app-header">
+        <div class="header-brand">
+            <div class="brand-icon">⚡</div>
+            <div>
+                <h1 class="brand-title">FACTORY ENERGY DASHBOARD</h1>
+                <p class="brand-subtitle">Real-Time Telemetry & Anomaly Exception Engine</p>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <div class="system-badge"><span class="pulse-dot"></span> LIVE INGESTION</div>
+            <div class="clock-display" id="clockDisplay">00:00:00</div>
+            <button class="btn btn-outline" id="toggleAlertDrawerBtn">
+                🚨 Alerts <span class="badge badge-danger" id="navAlertBadge">0</span>
+            </button>
+            <button class="btn btn-primary" id="openEntryModalBtn">+ Log Telemetry</button>
+        </div>
+    </header>
+
+    <!-- Top Alert Banner for Active Critical Breaches -->
+    <div class="alert-banner hidden" id="topAlertBanner">
+        <div class="banner-content">
+            <span class="banner-icon">⚠️</span>
+            <span id="topAlertMessage">CRITICAL: High Energy Consumption Anomaly Detected!</span>
+        </div>
+        <button class="banner-dismiss" id="dismissBannerBtn">&times;</button>
+    </div>
+
+    <!-- Main Container -->
+    <main class="dashboard-container">
+        <!-- Summary Indicators Cards Row -->
+        <section class="kpi-grid">
+            <div class="kpi-card glass-panel">
+                <div class="kpi-header">
+                    <span class="kpi-title">TOTAL ENERGY</span>
+                    <span class="kpi-icon">🔋</span>
+                </div>
+                <div class="kpi-value" id="kpiTotalKwh">0.0 <span class="kpi-unit">kWh</span></div>
+                <div class="kpi-footer text-success">↑ 4.2% vs last shift</div>
+            </div>
+
+            <div class="kpi-card glass-panel">
+                <div class="kpi-header">
+                    <span class="kpi-title">PEAK DEMAND</span>
+                    <span class="kpi-icon">⚡</span>
+                </div>
+                <div class="kpi-value" id="kpiPeakKw">0.0 <span class="kpi-unit">kW</span></div>
+                <div class="kpi-footer text-warning">Threshold limit: 200 kW</div>
+            </div>
+
+            <div class="kpi-card glass-panel">
+                <div class="kpi-header">
+                    <span class="kpi-title">ACTIVE ALERTS</span>
+                    <span class="kpi-icon">🚨</span>
+                </div>
+                <div class="kpi-value text-danger" id="kpiActiveAlerts">0</div>
+                <div class="kpi-footer" id="kpiAlertFooter">0 Critical | 0 Warning</div>
+            </div>
+
+            <div class="kpi-card glass-panel">
+                <div class="kpi-header">
+                    <span class="kpi-title">POWER FACTOR</span>
+                    <span class="kpi-icon">📊</span>
+                </div>
+                <div class="kpi-value" id="kpiPowerFactor">0.00</div>
+                <div class="kpi-footer text-success">Target: > 0.90 PF</div>
+            </div>
+
+            <div class="kpi-card glass-panel">
+                <div class="kpi-header">
+                    <span class="kpi-title">EFFICIENCY SCORE</span>
+                    <span class="kpi-icon">🌱</span>
+                </div>
+                <div class="kpi-value text-accent" id="kpiEfficiencyScore">0.0<span class="kpi-unit">%</span></div>
+                <div class="kpi-footer text-accent">Optimal Operating Grade</div>
+            </div>
+        </section>
+
+        <!-- Searchable Dashboard Control Bar & Data Table -->
+        <section class="table-section glass-panel">
+            <div class="table-controls">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" placeholder="Search Machine ID, Name or Line..." class="form-control">
+                </div>
+
+                <div class="filter-group">
+                    <select id="lineFilter" class="form-control">
+                        <option value="ALL">All Production Lines</option>
+                        <option value="Stamping">Stamping Lines</option>
+                        <option value="Assembly">Assembly Lines</option>
+                        <option value="Smelting">Smelting & Foundry</option>
+                        <option value="Packaging">Packaging Lines</option>
+                        <option value="Infrastructure">Infrastructure</option>
+                    </select>
+
+                    <select id="statusFilter" class="form-control">
+                        <option value="ALL">All Statuses</option>
+                        <option value="NORMAL">NORMAL</option>
+                        <option value="WARNING">WARNING</option>
+                        <option value="CRITICAL">CRITICAL</option>
+                    </select>
+
+                    <button class="btn btn-secondary" id="refreshBtn">🔄 Refresh</button>
+                </div>
+            </div>
+
+            <!-- Telemetry Data Table -->
+            <div class="table-responsive">
+                <table class="telemetry-table">
+                    <thead>
+                        <tr>
+                            <th>Machine ID</th>
+                            <th>Machine Name</th>
+                            <th>Production Line</th>
+                            <th>Power (kW)</th>
+                            <th>Voltage (V)</th>
+                            <th>Current (A)</th>
+                            <th>Power Factor</th>
+                            <th>Status</th>
+                            <th>Recorded At</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="telemetryTableBody">
+                        <!-- Loaded dynamically via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Telemetry Entry Modal Form -->
+    <div class="modal-backdrop hidden" id="entryModal">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <h3>⚡ Ingest Machine Energy Telemetry</h3>
+                <button class="modal-close" id="closeEntryModalBtn">&times;</button>
+            </div>
+            <form id="telemetryForm">
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="formMachineId">Machine ID *</label>
+                            <input type="text" id="formMachineId" class="form-control" placeholder="e.g. M-PRESS-101" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="formMachineName">Machine Name *</label>
+                            <input type="text" id="formMachineName" class="form-control" placeholder="e.g. Hydraulic Press" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="formProductionLine">Production Line *</label>
+                            <input type="text" id="formProductionLine" class="form-control" placeholder="e.g. Stamping Line A" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="formPowerKW">Power Consumption (kW) *</label>
+                            <input type="number" step="0.1" id="formPowerKW" class="form-control" placeholder="e.g. 185.5" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="formVoltageV">Voltage (V) *</label>
+                            <input type="number" step="0.1" id="formVoltageV" class="form-control" placeholder="e.g. 415.0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="formCurrentA">Current (A) *</label>
+                            <input type="number" step="0.1" id="formCurrentA" class="form-control" placeholder="e.g. 210.0" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="formPowerFactor">Power Factor (0.0 - 1.0) *</label>
+                            <input type="number" step="0.01" min="0" max="1" id="formPowerFactor" class="form-control" placeholder="e.g. 0.94" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancelEntryModalBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="submitTelemetryBtn">Submit Telemetry</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Machine Status Drill-Down Modal -->
+    <div class="modal-backdrop hidden" id="drilldownModal">
+        <div class="modal-content glass-panel modal-lg">
+            <div class="modal-header">
+                <h3 id="drilldownMachineTitle">Machine Telemetry Drill-Down</h3>
+                <button class="modal-close" id="closeDrilldownModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="drilldown-summary-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Current Power</div>
+                        <div class="stat-val" id="ddCurrentPower">0 kW</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Peak Historical Load</div>
+                        <div class="stat-val" id="ddPeakPower">0 kW</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Avg Power Factor</div>
+                        <div class="stat-val" id="ddAvgPF">0.00</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Health Status</div>
+                        <div class="stat-val" id="ddHealthStatus">NORMAL</div>
+                    </div>
+                </div>
+
+                <div class="advice-box" id="ddAdviceBox">
+                    <strong>Diagnostic Recommendation:</strong> <span id="ddAdviceText">Loading diagnostic analysis...</span>
+                </div>
+
+                <h4>Telemetry Log History</h4>
+                <div class="table-responsive">
+                    <table class="telemetry-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Power (kW)</th>
+                                <th>Voltage (V)</th>
+                                <th>Current (A)</th>
+                                <th>Power Factor</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ddHistoryBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Exception View Drawer -->
+    <div class="drawer-backdrop hidden" id="alertDrawer">
+        <div class="drawer-content glass-panel">
+            <div class="drawer-header">
+                <h3>🚨 System Anomaly Alerts</h3>
+                <button class="drawer-close" id="closeAlertDrawerBtn">&times;</button>
+            </div>
+            <div class="drawer-body" id="alertDrawerList">
+                <!-- Loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

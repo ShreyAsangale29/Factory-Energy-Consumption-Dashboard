@@ -1,0 +1,34 @@
+# Compiled Java & Maven output
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+.mvn/wrapper/maven-wrapper.jar
+
+# Log & Temporary files
+*.log
+app.log
+hs_err_pid*
+target/test-screenshots/
+
+# IDE & Editor metadata
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+.DS_Store
+
+# Node / Frontend temporary files
+node_modules/
+dist/
+build/
+
+# Database files
+*.db
+*.h2.db
