@@ -9,7 +9,7 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 COPY backend/target/energy-dashboard-0.0.1-SNAPSHOT.jar app.jar
 COPY frontend /app/frontend
 
-EXPOSE 8080
+EXPOSE 8085
 USER appuser
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

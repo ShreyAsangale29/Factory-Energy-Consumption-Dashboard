@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: factory-energy-app
     ports:
-      - "8080:8080"
+      - "8085:8085"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
     restart: always
