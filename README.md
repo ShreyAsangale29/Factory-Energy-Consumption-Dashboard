@@ -24,7 +24,7 @@ The **Factory Energy Consumption Dashboard** is an enterprise-grade full-stack w
 | **Week 10**| **Continuous Testing in Jenkins** | [Week 10 Continuous Test Document](docs/week-10-continuous-testing-in-jenkins.md) | Jenkins test stage, test failure gating demonstration, defect correction commit & rerun |
 | **Week 11**| **Docker Image & Container Lifecycle**| [Week 11 Docker Lifecycle Document](docs/week-11-docker-image-container-lifecycle.md) | Multi-stage `Dockerfile`, `docker-compose.yml`, container build/run/inspect/stop commands |
 | **Week 12**| **Jenkins-Docker Continuous Deploy** | [Week 12 Jenkins-Docker CD Document](docs/week-12-jenkins-docker-continuous-deployment.md) | Versioned Docker image, registry publish log, automated container deploy & rollback |
-| **Week 13**| **Security Hardening & Vuln Scan** | [Week 13 Security Document](docs/week-13-security-hardening-vulnerability-scanning.md) | Non-root user execution, Trivy container audit, OWASP dependency check, CORS policies |
+| **Week 13**| **Configuration Management (Ansible)** | [Week 13 Ansible Document](docs/week-13-configuration-management-ansible.md) | Ansible inventory (`hosts.ini`), YAML playbook, systemd service, firewall & execution log |
 | **Week 14**| **Monitoring, Logging & Observability**| [Week 14 Monitoring Document](docs/week-14-monitoring-logging-observability.md) | Prometheus metrics endpoint, JSON structured log output, alert webhook dispatchers |
 | **Week 15**| **Production Release & Closure** | [Week 15 Release Document](docs/week-15-production-release-maintenance-handover.md) | Final release tag `v2.0.0-final`, operations runbook, maintenance manual, final sign-off |
 

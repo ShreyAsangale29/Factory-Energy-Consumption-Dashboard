@@ -1,0 +1,124 @@
+---
+- name: Target Node Provisioning and Configuration for Factory Energy Consumption Dashboard
+  hosts: factory_servers
+  become: yes
+  vars:
+    app_name: factory-energy-dashboard
+    app_port: 8085
+    app_user: energyapp
+    app_group: energyapp
+    install_dir: /opt/factory-energy-dashboard
+    jar_name: energy-dashboard-0.0.1-SNAPSHOT.jar
+
+  tasks:
+    - name: 1. Update APT Package Cache and Install Prerequisites
+      apt:
+        name:
+          - openjdk-17-jre-headless
+          - curl
+          - wget
+          - git
+          - docker.io
+          - docker-compose
+          - nginx
+          - ufw
+        state: present
+        update_cache: yes
+
+    - name: 2. Create System Group for Factory Dashboard
+      group:
+        name: "{{ app_group }}"
+        state: present
+
+    - name: 3. Create Dedicated System User
+      user:
+        name: "{{ app_user }}"
+        group: "{{ app_group }}"
+        shell: /usr/sbin/nologin
+        create_home: no
+        state: present
+
+    - name: 4. Create Application Directory Hierarchy
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+        mode: '0755'
+      loop:
+        - "{{ install_dir }}"
+        - "{{ install_dir }}/bin"
+        - "{{ install_dir }}/config"
+        - "{{ install_dir }}/logs"
+        - "{{ install_dir }}/frontend"
+
+    - name: 5. Copy Spring Boot Executable JAR Artifact
+      copy:
+        src: "../../backend/target/{{ jar_name }}"
+        dest: "{{ install_dir }}/bin/{{ jar_name }}"
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+        mode: '0755'
+
+    - name: 6. Deploy Application Configuration File
+      copy:
+        src: "../../backend/src/main/resources/application.properties"
+        dest: "{{ install_dir }}/config/application.properties"
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+        mode: '0644'
+
+    - name: 7. Configure Systemd Service Unit File
+      copy:
+        dest: "/etc/systemd/system/{{ app_name }}.service"
+        mode: '0644'
+        content: |
+          [Unit]
+          Description=Factory Energy Consumption Dashboard Service
+          After=network.target syslog.target
+
+          [Service]
+          Type=simple
+          User={{ app_user }}
+          Group={{ app_group }}
+          WorkingDirectory={{ install_dir }}
+          ExecStart=/usr/bin/java -Dserver.port={{ app_port }} -Dspring.config.location={{ install_dir }}/config/application.properties -jar {{ install_dir }}/bin/{{ jar_name }}
+          Restart=always
+          RestartSec=10
+          StandardOutput=journal
+          StandardError=journal
+          SyslogIdentifier={{ app_name }}
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: 8. Configure UFW Firewall Port Access
+      ufw:
+        rule: allow
+        port: "{{ item }}"
+        proto: tcp
+      loop:
+        - "80"
+        - "443"
+        - "{{ app_port }}"
+
+    - name: 9. Reload Systemd and Start Factory Energy Dashboard Service
+      systemd:
+        name: "{{ app_name }}"
+        state: restarted
+        enabled: yes
+        daemon_reload: yes
+
+    - name: 10. Verify Target Node HTTP Health Endpoint
+      uri:
+        url: "http://localhost:{{ app_port }}/api/v1/dashboard/summary"
+        status_code: 200
+        return_content: yes
+      register: health_check
+      until: health_check.status == 200
+      retries: 5
+      delay: 3
+
+    - name: 11. Display Target Node Health Status
+      debug:
+        msg: "Target Node Deployment Successful! Summary response: {{ health_check.content }}"
