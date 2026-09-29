@@ -1,6 +1,7 @@
 package com.factory.energydashboard.selenium;
 
 import com.factory.energydashboard.EnergyDashboardApplication;
+import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -33,7 +34,11 @@ public class FactoryDashboardSeleniumTest {
 
     @BeforeAll
     public static void setupClass() {
-        System.setProperty("webdriver.chrome.driver", System.getProperty("webdriver.chrome.driver", "chromedriver"));
+        try {
+            WebDriverManager.chromedriver().setup();
+        } catch (Exception e) {
+            System.out.println("[SELENIUM SETUP] WebDriverManager setup fallback: " + e.getMessage());
+        }
     }
 
     @BeforeEach
