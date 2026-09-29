@@ -6,7 +6,8 @@
 ## 📌 Project Overview
 The **Factory Energy Consumption Dashboard** is an enterprise-grade full-stack web application designed for manufacturing plant managers, energy auditors, and maintenance engineers to monitor real-time machine-level power consumption (kW), voltage (V), current (A), and power factor (PF). It features an automated anomaly threshold engine that triggers high-consumption alerts, a searchable telemetry table, machine drill-down analytics, and complete DevOps CI/CD pipeline integration.
 
-📖 **[Read the Complete 15-Week Project Master Report & Roadmap Guide](docs/complete-15-week-project-master-report.md)**
+📖 **[Read the Complete 15-Week Project Master Report & Roadmap Guide](docs/complete-15-week-project-master-report.md)**  
+🎤 **[Read the Detailed Project Presentation Script & Slide Deck Handbook](docs/project-presentation-script-and-slides.md)**
 
 ---
 
