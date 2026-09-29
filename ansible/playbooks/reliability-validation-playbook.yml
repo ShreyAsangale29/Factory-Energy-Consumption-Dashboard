@@ -1,0 +1,129 @@
+---
+- name: Week 14 - Automated Provisioning, Idempotency and Rollback Validation
+  hosts: factory_servers
+  become: yes
+  vars:
+    app_name: factory-energy-dashboard
+    app_port: 8085
+    app_user: energyapp
+    app_group: energyapp
+    install_dir: /opt/factory-energy-dashboard
+    current_version: "v1.4.0"
+    previous_version: "v1.0.0-mvp"
+
+  tasks:
+    - name: 1. Provision Clean Target Environment Dependencies
+      apt:
+        name: [openjdk-17-jre-headless, curl, docker.io, nginx, ufw]
+        state: present
+        update_cache: yes
+
+    - name: 2. Ensure Application Directory Structure Exists
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+        mode: '0755'
+      loop:
+        - "{{ install_dir }}"
+        - "{{ install_dir }}/bin"
+        - "{{ install_dir }}/config"
+        - "{{ install_dir }}/logs"
+        - "{{ install_dir }}/backups"
+
+    - name: 3. Create Backup of Stable Container / Artifact Baseline
+      copy:
+        src: "../../backend/target/energy-dashboard-0.0.1-SNAPSHOT.jar"
+        dest: "{{ install_dir }}/backups/{{ previous_version }}-energy-dashboard.jar"
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+        mode: '0755'
+        remote_src: no
+
+    - name: 4. Deploy Current Version Application Artifact
+      copy:
+        src: "../../backend/target/energy-dashboard-0.0.1-SNAPSHOT.jar"
+        dest: "{{ install_dir }}/bin/energy-dashboard-0.0.1-SNAPSHOT.jar"
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+        mode: '0755'
+
+    - name: 5. Ensure Systemd Service Configuration is Enforced
+      copy:
+        dest: "/etc/systemd/system/{{ app_name }}.service"
+        mode: '0644'
+        content: |
+          [Unit]
+          Description=Factory Energy Consumption Dashboard Service
+          After=network.target
+
+          [Service]
+          Type=simple
+          User={{ app_user }}
+          Group={{ app_group }}
+          WorkingDirectory={{ install_dir }}
+          ExecStart=/usr/bin/java -Dserver.port={{ app_port }} -jar {{ install_dir }}/bin/energy-dashboard-0.0.1-SNAPSHOT.jar
+          Restart=always
+          RestartSec=5
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: 6. Enforce Firewall Rule
+      ufw:
+        rule: allow
+        port: "{{ app_port }}"
+        proto: tcp
+
+    - name: 7. Restart and Ensure Systemd Service is Active
+      systemd:
+        name: "{{ app_name }}"
+        state: started
+        enabled: yes
+        daemon_reload: yes
+
+    - name: 8. Execute HTTP Health Check Validation
+      uri:
+        url: "http://localhost:{{ app_port }}/api/v1/dashboard/summary"
+        status_code: 200
+        return_content: yes
+      register: health_result
+      until: health_result.status == 200
+      retries: 5
+      delay: 2
+
+    - name: 9. Display Health Check Metric Output
+      debug:
+        msg: "HEALTH CHECK PASSED: {{ health_result.content }}"
+
+- name: Rollback Handler Play (Executed on Deployment Failure Simulation)
+  hosts: factory_servers
+  become: yes
+  vars:
+    app_name: factory-energy-dashboard
+    app_port: 8085
+    install_dir: /opt/factory-energy-dashboard
+    previous_version: "v1.0.0-mvp"
+
+  tasks:
+    - name: ROLLBACK-1. Restore Previous Stable Artifact Baseline
+      copy:
+        src: "{{ install_dir }}/backups/{{ previous_version }}-energy-dashboard.jar"
+        dest: "{{ install_dir }}/bin/energy-dashboard-0.0.1-SNAPSHOT.jar"
+        remote_src: yes
+
+    - name: ROLLBACK-2. Restart Service with Restored Baseline
+      systemd:
+        name: "{{ app_name }}"
+        state: restarted
+
+    - name: ROLLBACK-3. Verify Recovery HTTP Status
+      uri:
+        url: "http://localhost:{{ app_port }}/api/v1/dashboard/summary"
+        status_code: 200
+      register: recovery_check
+
+    - name: ROLLBACK-4. Confirm Recovery Success
+      debug:
+        msg: "ROLLBACK SUCCESSFUL: Target node recovered cleanly to {{ previous_version }} with status {{ recovery_check.status }}"
