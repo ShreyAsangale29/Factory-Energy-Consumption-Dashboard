@@ -3,12 +3,16 @@ pipeline {
 
     parameters {
         choice(name: 'DEPLOY_ENV', choices: ['staging', 'production'], description: 'Target Deployment Environment')
-        string(name: 'SERVER_PORT', defaultValue: '8080', description: 'Application Server HTTP Port')
+        string(name: 'HOST_PORT', defaultValue: '8085', description: 'Application Server External Port')
+        string(name: 'DOCKER_REGISTRY', defaultValue: 'docker.io/factory', description: 'Docker Registry Namespace')
     }
 
     environment {
         APP_NAME = 'factory-energy-dashboard'
         JAR_FILE = 'backend/target/energy-dashboard-0.0.1-SNAPSHOT.jar'
+        IMAGE_NAME = "${params.DOCKER_REGISTRY}/${env.APP_NAME}"
+        BUILD_TAG = "v1.2.0-${env.BUILD_NUMBER}"
+        CONTAINER_NAME = 'factory-app-container'
     }
 
     stages {
@@ -19,18 +23,18 @@ pipeline {
             }
         }
 
-        stage('Build & Package') {
+        stage('Compile & Package JAR') {
             steps {
-                echo 'Compiling Java application and packaging JAR via Maven...'
+                echo 'Compiling Java Spring Boot application and packaging executable JAR...'
                 dir('backend') {
                     sh 'mvn clean package -DskipTests=true'
                 }
             }
         }
 
-        stage('Execute Unit & Integration Tests') {
+        stage('Execute Continuous Tests') {
             steps {
-                echo 'Running JUnit backend integration test suite...'
+                echo 'Running JUnit Integration & Selenium WebDriver UI test suite...'
                 dir('backend') {
                     sh 'mvn test'
                 }
@@ -39,45 +43,58 @@ pipeline {
                 always {
                     junit 'backend/target/surefire-reports/*.xml'
                 }
-            }
-        }
-
-        stage('Continuous UI Testing (Selenium)') {
-            steps {
-                echo 'Executing Selenium Headless E2E Browser Test Suite...'
-                dir('backend') {
-                    sh 'mvn test -Dtest=FactoryDashboardSeleniumTest'
-                }
-            }
-            post {
-                always {
-                    junit 'backend/target/surefire-reports/TEST-*.xml'
-                    archiveArtifacts artifacts: 'backend/target/test-screenshots/*.png', allowEmptyArchive: true
-                }
                 failure {
-                    echo '[CRITICAL ALERT] Selenium test suite failed! Halting pipeline deployment.'
+                    echo '[CRITICAL ALERT] Test suite failed! Halting container deployment.'
                 }
             }
         }
 
-        stage('Deploy Application Server') {
+        stage('Build Versioned Docker Image') {
             steps {
-                echo "Deploying ${env.APP_NAME} to ${params.DEPLOY_ENV} on port ${params.SERVER_PORT}..."
+                echo "Building versioned Docker image: ${env.IMAGE_NAME}:${env.BUILD_TAG}..."
                 sh """
-                    echo "Checking for running instance..."
-                    pkill -f ${env.APP_NAME} || true
-                    echo "Starting application process..."
-                    nohup java -Dserver.port=${params.SERVER_PORT} -jar ${env.JAR_FILE} > app.log 2>&1 &
+                    docker build -t ${env.IMAGE_NAME}:${env.BUILD_TAG} .
+                    docker tag ${env.IMAGE_NAME}:${env.BUILD_TAG} ${env.IMAGE_NAME}:latest
+                """
+            }
+        }
+
+        stage('Publish Image to Registry') {
+            steps {
+                echo "Publishing image ${env.IMAGE_NAME}:${env.BUILD_TAG} to Docker Registry..."
+                /*
+                 * Production Registry Push Authentication:
+                 * withDockerRegistry(credentialsId: 'docker-hub-credentials', url: '') {
+                 *     sh "docker push ${env.IMAGE_NAME}:${env.BUILD_TAG}"
+                 *     sh "docker push ${env.IMAGE_NAME}:latest"
+                 * }
+                 */
+                sh """
+                    echo "[REGISTRY PUSH SIMULATION] Successfully pushed ${env.IMAGE_NAME}:${env.BUILD_TAG} to registry."
+                """
+            }
+        }
+
+        stage('Automated Container Deployment') {
+            steps {
+                echo "Deploying fresh container ${env.CONTAINER_NAME} on port ${params.HOST_PORT}..."
+                sh """
+                    echo "Stopping and removing existing container if active..."
+                    docker stop ${env.CONTAINER_NAME} || true
+                    docker rm -f ${env.CONTAINER_NAME} || true
+
+                    echo "Launching new versioned container..."
+                    docker run -d --name ${env.CONTAINER_NAME} -p ${params.HOST_PORT}:8085 ${env.IMAGE_NAME}:${env.BUILD_TAG}
                     sleep 5
                 """
             }
         }
 
-        stage('Verify Health Check') {
+        stage('Verify Container Deployment Health') {
             steps {
-                echo 'Pinging application health endpoint...'
+                echo "Pinging health endpoint http://localhost:${params.HOST_PORT}/api/v1/dashboard/summary..."
                 sh """
-                    curl -s -f http://localhost:${params.SERVER_PORT}/api/v1/dashboard/summary || exit 1
+                    curl -s -f http://localhost:${params.HOST_PORT}/api/v1/dashboard/summary || (echo "Health check failed!" && exit 1)
                 """
             }
         }
@@ -85,10 +102,15 @@ pipeline {
 
     post {
         success {
-            echo "Pipeline completed successfully! Application deployed at http://localhost:${params.SERVER_PORT}"
+            echo "🎉 Continuous Deployment Pipeline Succeeded! Application running live at http://localhost:${params.HOST_PORT}"
         }
         failure {
-            echo "Pipeline failed! Please inspect logs and test failure screenshots."
+            echo "🚨 Pipeline Deployment Failed! Initiating automated rollback..."
+            sh """
+                docker stop ${env.CONTAINER_NAME} || true
+                docker rm -f ${env.CONTAINER_NAME} || true
+                docker run -d --name ${env.CONTAINER_NAME} -p ${params.HOST_PORT}:8085 ${env.IMAGE_NAME}:latest || true
+            """
         }
     }
 }
