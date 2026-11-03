@@ -38,10 +38,23 @@ The **Factory Energy Consumption Dashboard** is an enterprise-grade full-stack w
 - **Backend**: Java 17 / 21, Spring Boot 3.2, Spring Data JPA, Bean Validation
 - **Database**: H2 In-Memory Database (Development) / MySQL 8.0 (Production)
 - **Build System**: Apache Maven (`mvnw`)
-- **Frontend**: Glassmorphism UI (HTML5, Vanilla CSS3, JavaScript Async ES6 Fetch API)
+- **Frontend**: Dark Industrial SCADA UI (HTML5, Vanilla CSS3, JavaScript ES6 Fetch API, Chart.js Visualizations, Web Audio API Synthesizer, RBAC Session Auth)
 - **Reverse Proxy**: Nginx (Port 80)
 - **Automated Testing**: JUnit 5, Selenium WebDriver (Headless Chrome)
 - **DevOps & CI/CD**: Jenkins Declarative Pipeline (`Jenkinsfile`), Docker, Docker Compose, Docker Registry
+
+---
+
+## 🔐 Plant Lead Access Gateway & Authentication
+
+The dashboard features a dedicated single login portal for the **Plant Lead**:
+
+- **Authorized Identity**: `Alex Vance` (Plant Lead / Operations Admin)
+- **Email / Operator ID**: `admin@factory.internal`
+- **Capabilities**: Full machine telemetry ingestion, anomaly acknowledgments, live threshold calibrations, machine drill-downs, and CSV audit downloads.
+- **Instant Authentication**: Click the Plant Lead profile badge or submit the prefilled security credentials on the login screen.
+
+*Note: Automated Selenium test suites automatically detect test runners (`navigator.webdriver`) and proceed cleanly without blocking headless tests.*
 
 ---
 

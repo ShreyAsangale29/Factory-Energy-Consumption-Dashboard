@@ -3,146 +3,375 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Factory Energy Consumption Dashboard | Real-Time Monitoring</title>
-    <meta name="description" content="Industrial IoT real-time factory energy monitoring, anomaly alerting, and machine telemetry status drill-down dashboard.">
-    <link rel="stylesheet" href="css/styles.css">
+    <title>Factory Energy Consumption Dashboard | Industrial IoT SCADA Platform</title>
+    <meta name="description" content="Industrial IoT real-time factory energy monitoring, anomaly alerting, and machine telemetry status drill-down platform.">
+    <link rel="stylesheet" href="css/styles.css?v=4.1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN for Real-Time Industrial Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <!-- Top System Navigation Header -->
-    <header class="app-header">
-        <div class="header-brand">
-            <div class="brand-icon">⚡</div>
-            <div>
-                <h1 class="brand-title">FACTORY ENERGY DASHBOARD</h1>
-                <p class="brand-subtitle">Real-Time Telemetry & Anomaly Exception Engine</p>
+
+    <!-- ========================================================
+         PAGE 1: INFORMATIVE PUBLIC LANDING PAGE (FIRST PAGE VIEW)
+         ======================================================== -->
+    <div id="landingPageView">
+        <!-- Landing Page Top Navigation Bar -->
+        <header class="landing-navbar">
+            <div class="header-brand">
+                <div class="brand-icon">⚡</div>
+                <div>
+                    <h1 class="brand-title">FACTORY ENERGY DASHBOARD</h1>
+                    <p class="brand-subtitle">Industrial IoT Telemetry & Anomaly Exception Engine</p>
+                </div>
             </div>
-        </div>
 
-        <div class="header-actions">
-            <div class="system-badge"><span class="pulse-dot"></span> LIVE INGESTION</div>
-            <div class="clock-display" id="clockDisplay">00:00:00</div>
-            <button class="btn btn-outline" id="toggleAlertDrawerBtn">
-                🚨 Alerts <span class="badge badge-danger" id="navAlertBadge">0</span>
-            </button>
-            <button class="btn btn-primary" id="openEntryModalBtn">+ Log Telemetry</button>
-        </div>
-    </header>
+            <!-- Top Right Corner Navigation Actions with Login Button -->
+            <div class="header-actions">
+                <div class="system-badge"><span class="pulse-dot"></span> SYSTEM OPERATIONAL</div>
+                <div class="clock-display" id="landingClock">00:00:00</div>
+                <button class="btn btn-primary" id="landingLoginBtn" onclick="showLoginModal()">
+                    🔐 Plant Lead Login
+                </button>
+            </div>
+        </header>
 
-    <!-- Top Alert Banner for Active Critical Breaches -->
-    <div class="alert-banner hidden" id="topAlertBanner">
-        <div class="banner-content">
-            <span class="banner-icon">⚠️</span>
-            <span id="topAlertMessage">CRITICAL: High Energy Consumption Anomaly Detected!</span>
-        </div>
-        <button class="banner-dismiss" id="dismissBannerBtn">&times;</button>
+        <!-- Hero Presentation Banner -->
+        <section class="hero-section">
+            <div class="hero-badge-pill">
+                <span>⚡ Real-Time Industrial IoT Operations</span>
+                <span>•</span>
+                <span>Sub-30s Anomaly MTTD</span>
+            </div>
+
+            <h1 class="hero-title">
+                Next-Gen Factory Energy Monitoring & Automated Anomaly Prevention
+            </h1>
+
+            <p class="hero-subtitle">
+                An enterprise-grade Industrial IoT platform built for modern manufacturing plants. Monitor real-time electrical power demand across heavy machinery, detect load anomalies before equipment breaks, and eliminate peak demand utility penalty tariffs.
+            </p>
+
+            <div class="hero-actions">
+                <button class="btn btn-primary hero-btn-primary" onclick="showLoginModal()">
+                    ⚡ Access Plant Dashboard ➔
+                </button>
+                <a href="#systemFeatures" class="btn btn-secondary hero-btn-secondary">
+                    📖 Explore System Capabilities
+                </a>
+            </div>
+        </section>
+
+        <!-- Live Factory Telemetry Snapshot Ribbon -->
+        <section class="landing-stats-row">
+            <div class="landing-stat-card glass-panel">
+                <div class="landing-stat-number" id="landingTotalKwh">1,161.9</div>
+                <div class="landing-stat-label">Total kWh Monitored</div>
+            </div>
+
+            <div class="landing-stat-card glass-panel">
+                <div class="landing-stat-number" id="landingPeakKw">215.0 kW</div>
+                <div class="landing-stat-label">Peak Demand Ceiling</div>
+            </div>
+
+            <div class="landing-stat-card glass-panel">
+                <div class="landing-stat-number" id="landingPowerFactor">0.93 PF</div>
+                <div class="landing-stat-label">Average Power Factor</div>
+            </div>
+
+            <div class="landing-stat-card glass-panel">
+                <div class="landing-stat-number" id="landingEfficiency">85.7%</div>
+                <div class="landing-stat-label">Operating Efficiency Grade</div>
+            </div>
+        </section>
+
+        <!-- System Architecture & Core Capabilities Grid -->
+        <section class="landing-section-header" id="systemFeatures">
+            <span class="section-tag">System Architecture & Capabilities</span>
+            <h2 class="section-title">What the Factory Energy Platform Does</h2>
+        </section>
+
+        <section class="features-grid">
+            <div class="feature-card glass-panel">
+                <div class="feature-icon-box">⚡</div>
+                <h3 class="feature-title">Real-Time Telemetry Ingestion</h3>
+                <p class="feature-desc">
+                    Captures high-frequency electrical telemetry—power consumption (kW), voltage (V), current (A), and power factor (PF)—across Stamping, Assembly, Smelting, Packaging, and Infrastructure lines via RESTful sensor endpoints.
+                </p>
+            </div>
+
+            <div class="feature-card glass-panel">
+                <div class="feature-icon-box">🚨</div>
+                <h3 class="feature-title">Automated Anomaly Engine</h3>
+                <p class="feature-desc">
+                    Evaluates incoming sensor streams against automated safety thresholds: flags 150 kW warnings and 200 kW critical breaches instantly, triggering procedural audio alarms and real-time operator notification banners.
+                </p>
+            </div>
+
+            <div class="feature-card glass-panel">
+                <div class="feature-icon-box">📊</div>
+                <h3 class="feature-title">Visual SCADA Analytics</h3>
+                <p class="feature-desc">
+                    Features chronological load demand curves plotted against critical ceiling lines using Chart.js, paired with dynamic production-line donut breakdowns for quick load distribution insight.
+                </p>
+            </div>
+
+            <div class="feature-card glass-panel">
+                <div class="feature-icon-box">🔍</div>
+                <h3 class="feature-title">Predictive Machine Diagnostics</h3>
+                <p class="feature-desc">
+                    Inspect individual equipment like hydraulic presses and induction furnaces with full chronological log drill-downs and automated diagnostic advice before mechanical motor failure occurs.
+                </p>
+            </div>
+
+            <div class="feature-card glass-panel">
+                <div class="feature-icon-box">🔲</div>
+                <h3 class="feature-title">Dual SCADA Floor View</h3>
+                <p class="feature-desc">
+                    Toggle between dense tabular SCADA records and an interactive machine floor grid featuring glowing status borders, load capacity progress meters, and single-click telemetry drill-downs.
+                </p>
+            </div>
+
+            <div class="feature-card glass-panel">
+                <div class="feature-icon-box">📑</div>
+                <h3 class="feature-title">ISO 50001 Energy Audits</h3>
+                <p class="feature-desc">
+                    Instantly compile, filter, and export factory telemetry logs into compliance-ready CSV audit files for corporate sustainability reporting and environmental ESG governance.
+                </p>
+            </div>
+        </section>
+
+        <!-- Tech Stack & DevOps Verification Banner -->
+        <section class="tech-banner glass-panel">
+            <div>
+                <h3 style="font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 0.35rem;">
+                    Enterprise Multi-Tier Architecture & DevOps Lifecycle
+                </h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">
+                    Engineered with Spring Boot 3.2, JPA, automated Jenkins CI/CD, Docker containerization, and Ansible configuration management.
+                </p>
+            </div>
+            <div class="tech-tags">
+                <span class="tech-tag-pill">Java 17 / 21</span>
+                <span class="tech-tag-pill">Spring Boot 3.2</span>
+                <span class="tech-tag-pill">H2 / MySQL</span>
+                <span class="tech-tag-pill">Chart.js</span>
+                <span class="tech-tag-pill">Docker</span>
+                <span class="tech-tag-pill">Jenkins CI/CD</span>
+                <span class="tech-tag-pill">Ansible</span>
+                <span class="tech-tag-pill">Selenium E2E</span>
+            </div>
+        </section>
+
+        <!-- Landing Page Footer -->
+        <footer class="landing-footer">
+            <p>⚡ Factory Energy Consumption Dashboard Platform • Release Baseline v2.0.0-final • 256-Bit TLS Industrial Session</p>
+        </footer>
     </div>
 
-    <!-- Main Container -->
-    <main class="dashboard-container">
-        <!-- Summary Indicators Cards Row -->
-        <section class="kpi-grid">
-            <div class="kpi-card glass-panel">
-                <div class="kpi-header">
-                    <span class="kpi-title">TOTAL ENERGY</span>
-                    <span class="kpi-icon">🔋</span>
-                </div>
-                <div class="kpi-value" id="kpiTotalKwh">0.0 <span class="kpi-unit">kWh</span></div>
-                <div class="kpi-footer text-success">↑ 4.2% vs last shift</div>
-            </div>
 
-            <div class="kpi-card glass-panel">
-                <div class="kpi-header">
-                    <span class="kpi-title">PEAK DEMAND</span>
-                    <span class="kpi-icon">⚡</span>
-                </div>
-                <div class="kpi-value" id="kpiPeakKw">0.0 <span class="kpi-unit">kW</span></div>
-                <div class="kpi-footer text-warning">Threshold limit: 200 kW</div>
-            </div>
-
-            <div class="kpi-card glass-panel">
-                <div class="kpi-header">
-                    <span class="kpi-title">ACTIVE ALERTS</span>
-                    <span class="kpi-icon">🚨</span>
-                </div>
-                <div class="kpi-value text-danger" id="kpiActiveAlerts">0</div>
-                <div class="kpi-footer" id="kpiAlertFooter">0 Critical | 0 Warning</div>
-            </div>
-
-            <div class="kpi-card glass-panel">
-                <div class="kpi-header">
-                    <span class="kpi-title">POWER FACTOR</span>
-                    <span class="kpi-icon">📊</span>
-                </div>
-                <div class="kpi-value" id="kpiPowerFactor">0.00</div>
-                <div class="kpi-footer text-success">Target: > 0.90 PF</div>
-            </div>
-
-            <div class="kpi-card glass-panel">
-                <div class="kpi-header">
-                    <span class="kpi-title">EFFICIENCY SCORE</span>
-                    <span class="kpi-icon">🌱</span>
-                </div>
-                <div class="kpi-value text-accent" id="kpiEfficiencyScore">0.0<span class="kpi-unit">%</span></div>
-                <div class="kpi-footer text-accent">Optimal Operating Grade</div>
-            </div>
-        </section>
-
-        <!-- Searchable Dashboard Control Bar & Data Table -->
-        <section class="table-section glass-panel">
-            <div class="table-controls">
-                <div class="search-box">
-                    <span class="search-icon">🔍</span>
-                    <input type="text" id="searchInput" placeholder="Search Machine ID, Name or Line..." class="form-control">
-                </div>
-
-                <div class="filter-group">
-                    <select id="lineFilter" class="form-control">
-                        <option value="ALL">All Production Lines</option>
-                        <option value="Stamping">Stamping Lines</option>
-                        <option value="Assembly">Assembly Lines</option>
-                        <option value="Smelting">Smelting & Foundry</option>
-                        <option value="Packaging">Packaging Lines</option>
-                        <option value="Infrastructure">Infrastructure</option>
-                    </select>
-
-                    <select id="statusFilter" class="form-control">
-                        <option value="ALL">All Statuses</option>
-                        <option value="NORMAL">NORMAL</option>
-                        <option value="WARNING">WARNING</option>
-                        <option value="CRITICAL">CRITICAL</option>
-                    </select>
-
-                    <button class="btn btn-secondary" id="refreshBtn">🔄 Refresh</button>
+    <!-- ========================================================
+         PAGE 2: OPERATIONAL LIVE SCADA DASHBOARD (AUTHENTICATED)
+         ======================================================== -->
+    <div id="dashboardView" class="hidden">
+        <!-- Top System Navigation Header -->
+        <header class="app-header">
+            <div class="header-brand">
+                <div class="brand-icon">⚡</div>
+                <div>
+                    <h1 class="brand-title">FACTORY ENERGY DASHBOARD</h1>
+                    <p class="brand-subtitle">Real-Time Telemetry & Anomaly Exception Engine</p>
                 </div>
             </div>
 
-            <!-- Telemetry Data Table -->
-            <div class="table-responsive">
-                <table class="telemetry-table">
-                    <thead>
-                        <tr>
-                            <th>Machine ID</th>
-                            <th>Machine Name</th>
-                            <th>Production Line</th>
-                            <th>Power (kW)</th>
-                            <th>Voltage (V)</th>
-                            <th>Current (A)</th>
-                            <th>Power Factor</th>
-                            <th>Status</th>
-                            <th>Recorded At</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="telemetryTableBody">
-                        <!-- Loaded dynamically via JavaScript -->
-                    </tbody>
-                </table>
+            <div class="header-actions">
+                <div class="system-badge"><span class="pulse-dot"></span> LIVE INGESTION</div>
+                <div class="clock-display" id="clockDisplay">00:00:00</div>
+                
+                <button class="btn btn-outline" id="portalOverviewBtn" onclick="showLandingView()" title="Return to System Portal Overview">
+                    🏠 Portal Overview
+                </button>
+
+                <button class="btn btn-outline" id="soundToggleBtn" title="Toggle Alert Sound FX">
+                    🔊 Sound: ON
+                </button>
+
+                <button class="btn btn-outline" id="toggleAlertDrawerBtn">
+                    🚨 Alerts <span class="badge badge-danger" id="navAlertBadge">0</span>
+                </button>
+
+                <button class="btn btn-secondary" id="exportCsvBtn" title="Export Current Telemetry Logs to CSV">
+                    📥 Export CSV
+                </button>
+
+                <button class="btn btn-primary" id="openEntryModalBtn">+ Log Telemetry</button>
+
+                <!-- Authenticated Plant Lead Profile Pill & Logout -->
+                <div class="user-profile-widget" id="userProfileWidget">
+                    <div class="user-avatar" id="navUserAvatar">AV</div>
+                    <div class="user-info-text">
+                        <span class="user-name" id="navUserName">Alex Vance</span>
+                        <span class="user-role-badge badge-admin" id="navUserRoleBadge">PLANT LEAD</span>
+                    </div>
+                    <button class="btn-logout" id="logoutBtn" title="Sign Out to Portal">⏻</button>
+                </div>
             </div>
-        </section>
-    </main>
+        </header>
+
+        <!-- Top Alert Banner for Active Critical Breaches -->
+        <div class="alert-banner hidden" id="topAlertBanner">
+            <div class="banner-content">
+                <span class="banner-icon">⚠️</span>
+                <span id="topAlertMessage">CRITICAL: High Energy Consumption Anomaly Detected!</span>
+            </div>
+            <button class="banner-dismiss" id="dismissBannerBtn">&times;</button>
+        </div>
+
+        <!-- Main Dashboard Container -->
+        <main class="dashboard-container">
+            <!-- Summary Indicators Cards Row -->
+            <section class="kpi-grid">
+                <div class="kpi-card glass-panel">
+                    <div class="kpi-header">
+                        <span class="kpi-title">TOTAL ENERGY</span>
+                        <span class="kpi-icon">🔋</span>
+                    </div>
+                    <div class="kpi-value" id="kpiTotalKwh">0.0 <span class="kpi-unit">kWh</span></div>
+                    <div class="kpi-footer text-success">↑ 4.2% vs last shift</div>
+                </div>
+
+                <div class="kpi-card glass-panel">
+                    <div class="kpi-header">
+                        <span class="kpi-title">PEAK DEMAND</span>
+                        <span class="kpi-icon">⚡</span>
+                    </div>
+                    <div class="kpi-value" id="kpiPeakKw">0.0 <span class="kpi-unit">kW</span></div>
+                    <div class="kpi-footer text-warning">Threshold limit: 200 kW</div>
+                </div>
+
+                <div class="kpi-card glass-panel">
+                    <div class="kpi-header">
+                        <span class="kpi-title">ACTIVE ALERTS</span>
+                        <span class="kpi-icon">🚨</span>
+                    </div>
+                    <div class="kpi-value text-danger" id="kpiActiveAlerts">0</div>
+                    <div class="kpi-footer" id="kpiAlertFooter">0 Critical | 0 Warning</div>
+                </div>
+
+                <div class="kpi-card glass-panel">
+                    <div class="kpi-header">
+                        <span class="kpi-title">POWER FACTOR</span>
+                        <span class="kpi-icon">📊</span>
+                    </div>
+                    <div class="kpi-value" id="kpiPowerFactor">0.00</div>
+                    <div class="kpi-footer text-success">Target: > 0.90 PF</div>
+                </div>
+
+                <div class="kpi-card glass-panel">
+                    <div class="kpi-header">
+                        <span class="kpi-title">EFFICIENCY SCORE</span>
+                        <span class="kpi-icon">🌱</span>
+                    </div>
+                    <div class="kpi-value text-accent" id="kpiEfficiencyScore">0.0<span class="kpi-unit">%</span></div>
+                    <div class="kpi-footer text-accent">Optimal Operating Grade</div>
+                </div>
+            </section>
+
+            <!-- Real-Time Interactive Analytics & Trend Visuals -->
+            <section class="charts-section">
+                <div class="chart-card glass-panel">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">REAL-TIME FACTORY POWER DEMAND (kW)</div>
+                            <div class="chart-subtitle">Chronological load demand vs 200 kW critical threshold limit</div>
+                        </div>
+                        <div class="chart-badge"><span class="pulse-dot"></span> LIVE SENSOR FEED</div>
+                    </div>
+                    <div class="chart-canvas-wrapper">
+                        <canvas id="energyTrendChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card glass-panel">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">LOAD BY PRODUCTION LINE</div>
+                            <div class="chart-subtitle">Active distribution of aggregate power consumption</div>
+                        </div>
+                    </div>
+                    <div class="chart-canvas-wrapper donut-wrapper">
+                        <canvas id="lineShareChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Searchable Dashboard Control Bar & Data Table / Machine Grid -->
+            <section class="table-section glass-panel">
+                <div class="table-controls">
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="searchInput" placeholder="Search Machine ID, Name or Line..." class="form-control">
+                    </div>
+
+                    <div class="filter-group">
+                        <select id="lineFilter" class="form-control">
+                            <option value="ALL">All Production Lines</option>
+                            <option value="Stamping">Stamping Lines</option>
+                            <option value="Assembly">Assembly Lines</option>
+                            <option value="Smelting">Smelting & Foundry</option>
+                            <option value="Packaging">Packaging Lines</option>
+                            <option value="Infrastructure">Infrastructure</option>
+                        </select>
+
+                        <select id="statusFilter" class="form-control">
+                            <option value="ALL">All Statuses</option>
+                            <option value="NORMAL">NORMAL</option>
+                            <option value="WARNING">WARNING</option>
+                            <option value="CRITICAL">CRITICAL</option>
+                        </select>
+
+                        <!-- View Switcher -->
+                        <div class="view-mode-toggle">
+                            <button class="view-toggle-btn active" id="viewTableBtn" title="Dense Table View">📋 Table</button>
+                            <button class="view-toggle-btn" id="viewGridBtn" title="Machine Floor Card Grid">🔲 Floor Grid</button>
+                        </div>
+
+                        <button class="btn btn-secondary" id="refreshBtn">🔄 Refresh</button>
+                    </div>
+                </div>
+
+                <!-- View 1: Telemetry Data Table View -->
+                <div id="telemetryTableView" class="table-responsive">
+                    <table class="telemetry-table">
+                        <thead>
+                            <tr>
+                                <th>Machine ID</th>
+                                <th>Machine Name</th>
+                                <th>Production Line</th>
+                                <th>Power (kW)</th>
+                                <th>Voltage (V)</th>
+                                <th>Current (A)</th>
+                                <th>Power Factor</th>
+                                <th>Status</th>
+                                <th>Recorded At</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="telemetryTableBody">
+                            <!-- Loaded dynamically via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- View 2: Visual Machine Floor Grid View -->
+                <div id="machineFloorGridView" class="machine-grid hidden">
+                    <!-- Rendered dynamically via JavaScript -->
+                </div>
+            </section>
+        </main>
+    </div>
 
     <!-- Telemetry Entry Modal Form -->
     <div class="modal-backdrop hidden" id="entryModal">
@@ -266,6 +495,56 @@
         </div>
     </div>
 
-    <script src="js/app.js"></script>
+    <!-- Single Plant Lead Security Login Modal -->
+    <div class="modal-backdrop hidden" id="loginModal">
+        <div class="login-card glass-panel">
+            <div class="login-header">
+                <div class="login-brand-icon">⚡</div>
+                <h2 class="login-title">PLANT LEAD ACCESS GATEWAY</h2>
+                <p class="login-subtitle">Factory Energy Telemetry & Anomaly Operations</p>
+                <button class="modal-close" onclick="hideLoginModal()" style="position: absolute; top: 1.25rem; right: 1.25rem;">&times;</button>
+            </div>
+
+            <!-- Single Authorized Plant Lead Profile Card -->
+            <div class="plant-lead-card" id="plantLeadQuickCard">
+                <div class="plant-lead-avatar">AV</div>
+                <div class="plant-lead-details">
+                    <div class="plant-lead-name">
+                        <span>Alex Vance</span>
+                        <span class="plant-lead-badge">PLANT LEAD</span>
+                    </div>
+                    <div class="plant-lead-meta">Authorized Facility ID: LEAD-8085 • Operations Control</div>
+                </div>
+            </div>
+
+            <!-- Single Plant Lead Sign In Form -->
+            <form id="loginForm" onsubmit="return handlePlantLeadLogin(event)">
+                <div id="loginErrorMsg" class="hidden" style="color: #ef4444; font-size: 0.8rem; margin-bottom: 0.75rem; text-align: center; background: rgba(239, 68, 68, 0.12); padding: 0.5rem; border-radius: 6px; border: 1px solid rgba(239, 68, 68, 0.35);"></div>
+
+                <div class="form-group" style="margin-bottom: 0.9rem;">
+                    <label for="loginEmail">Plant Lead Email or ID</label>
+                    <input type="text" id="loginEmail" class="form-control" placeholder="Enter Operator ID or Email" required autocomplete="username">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                    <label for="loginPassword">Security Passcode</label>
+                    <input type="password" id="loginPassword" class="form-control" placeholder="Enter Security Passcode" required autocomplete="current-password">
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem; font-size: 0.92rem;" id="loginSubmitBtn">
+                    ⚡ Authenticate as Plant Lead ➔
+                </button>
+            </form>
+
+            <div class="login-footer-security">
+                <span>🛡️ Plant Lead Clearance • 256-Bit TLS Industrial Session</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating System Toast Notifications Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="js/app.js?v=4.1.0"></script>
 </body>
 </html>
