@@ -1,0 +1,79 @@
+name: Factory Energy Dashboard CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: 1. Build, Unit & Selenium E2E Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21 JDK (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Execute Tests (JUnit 5 & Selenium)
+        working-directory: backend
+        run: ./mvnw test
+
+      - name: Package Spring Boot Executable JAR
+        working-directory: backend
+        run: ./mvnw package -DskipTests
+
+      - name: Archive Production JAR Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: energy-dashboard-jar
+          path: backend/target/energy-dashboard-0.0.1-SNAPSHOT.jar
+          retention-days: 7
+
+  docker-stage:
+    name: 2. Container Build & Smoke Verification
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21 JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Package Executable JAR
+        working-directory: backend
+        run: ./mvnw package -DskipTests
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Multi-Stage Alpine Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: |
+            factory-energy-dashboard:latest
+            factory-energy-dashboard:${{ github.sha }}
+          load: true
+
+      - name: Test Container Launch & Health Check
+        run: |
+          docker run -d --name test-factory-app -p 8085:8085 factory-energy-dashboard:latest
+          sleep 8
+          curl -f http://localhost:8085/api/v1/dashboard/summary || (docker logs test-factory-app && exit 1)
+          docker stop test-factory-app
